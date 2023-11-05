@@ -25,6 +25,10 @@
 pointer_l = $0000
 pointer_h = $0001
 
+.enum $0002
+    SubroutineArgs .dsb 16
+.ende
+
 ;----------------------------------------------------------------
 ; iNES header
 ;----------------------------------------------------------------
@@ -147,11 +151,25 @@ Exit:
 ; Main Loop
 ;----------------------------------------------------------------
 Loop:
+    LDA #$02
+    STA addfixed_num_A+1
+    LDA #$00
+    STA addfixed_num_A
+    LDA #$03
+    STA addfixed_num_B+1
+    LDA #$00
+    STA addfixed_num_B
+    JSR AddFixed
+    LDA addfixed_num_A
+    STA $0020
+    LDA addfixed_num_A+1
+    STA $0021
     JMP Loop
 
 ;----------------------------------------------------------------
 ; Subroutines
 ;----------------------------------------------------------------
+.include "./src/subroutines/AddFixed.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts
