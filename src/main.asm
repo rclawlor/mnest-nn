@@ -152,17 +152,17 @@ Exit:
 ;----------------------------------------------------------------
 Loop:
     LDA #$02
-    STA addfixed_num_A+1
+    STA multiplyfixed_A+1
     LDA #$00
-    STA addfixed_num_A
+    STA multiplyfixed_A
     LDA #$03
-    STA addfixed_num_B+1
+    STA multiplyfixed_B+1
     LDA #$00
-    STA addfixed_num_B
-    JSR AddFixed
-    LDA addfixed_num_A
+    STA multiplyfixed_B
+    JSR MultiplyFixed
+    LDA multiplyfixed_C
     STA $0020
-    LDA addfixed_num_A+1
+    LDA multiplyfixed_C+1
     STA $0021
     JMP Loop
 
@@ -170,6 +170,7 @@ Loop:
 ; Subroutines
 ;----------------------------------------------------------------
 .include "./src/subroutines/AddFixed.asm"
+.include "./src/subroutines/MultiplyFixed.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts
