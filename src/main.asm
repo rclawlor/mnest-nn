@@ -1,6 +1,12 @@
 ;----------------------------------------------------------------
 ; Constants
 ;----------------------------------------------------------------
+INPUTS EQU $02
+OUTPUTS EQU $01
+
+weight_start_index EQU $0400
+
+LAYERS EQU #$04
 
 ;----------------------------------------------------------------
 ; Memory Map of NES
@@ -20,14 +26,24 @@
 ;   $4020-$FFFF :   Cartridge space
 
 ;----------------------------------------------------------------
-; variables
+; Variables
 ;----------------------------------------------------------------
 pointer_l = $0000
 pointer_h = $0001
 
-.enum $0002
-    SubroutineArgs .dsb 16
+weight_pointer_l = $0005
+weight_pointer_h = $0006
+
+.enum $0010
+    SubroutineArgs	.dsb 16
+	layer_counter	.dsb 1 
+	neuron_counter	.dsb 1
+	weight_counter	.dsb 1
+	neuron_input_counter	.dsb 1
+	neuron_inputs 	.dsb 1
 .ende
+
+; weight_start_index = $0400
 
 ;----------------------------------------------------------------
 ; iNES header
@@ -38,7 +54,7 @@ Header:
 	.db "NES", $1a  ;identification of the iNES header
 	.db $02         ; 32KB PRG (2x 16KB banks)
     .db $01         ; 8KB CHR (1x 8KB bank)
-    .db $00         ; mapper 0 NROM
+    .db $00   		; mapper 0 NROM
     .db $00         ; mapper 0
     .db $00
     .db $00
@@ -151,19 +167,7 @@ Exit:
 ; Main Loop
 ;----------------------------------------------------------------
 Loop:
-    LDA #$02
-    STA multiplyfixed_A+1
-    LDA #$00
-    STA multiplyfixed_A
-    LDA #$03
-    STA multiplyfixed_B+1
-    LDA #$00
-    STA multiplyfixed_B
-    JSR MultiplyFixed
-    LDA multiplyfixed_C
-    STA $0020
-    LDA multiplyfixed_C+1
-    STA $0021
+	JSR InitialiseWeights 
     JMP Loop
 
 ;----------------------------------------------------------------
@@ -171,6 +175,7 @@ Loop:
 ;----------------------------------------------------------------
 .include "./src/subroutines/AddFixed.asm"
 .include "./src/subroutines/MultiplyFixed.asm"
+.include "./src/subroutines/InitialiseWeights.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts
@@ -189,8 +194,8 @@ NMI:
     LDA $2002           ; Clear high/low latch
     LDA #$20            ; Load high byte of screen address
     STA $2006           ; Set PPU write address
-    LDY #$50            ; Load low byte of screen address
-    STY $2006
+    LDA #$50            ; Load low byte of screen address
+    STA $2006
 
     LDA #%10001000  ; Turn on NMI
     STA $2000
@@ -201,9 +206,9 @@ NMI:
     STA $2005
 
     PLA
-    TYA
+    TAY
     PLA
-    TXA
+    TAX
     PLA             ; Restore A, X and Y from the stack
 
     RTI
@@ -232,6 +237,13 @@ Sprites:
 ;----------------------------------------------------------------
 ; Constants
 ;----------------------------------------------------------------
+
+	.org $A000
+Layers:
+	.db $02
+	.db $02
+	.db $02
+	.db $01
 
 ;----------------------------------------------------------------
 ; Vectors
