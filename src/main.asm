@@ -176,6 +176,7 @@ Loop:
 .include "./src/subroutines/AddFixed.asm"
 .include "./src/subroutines/MultiplyFixed.asm"
 .include "./src/subroutines/InitialiseWeights.asm"
+.include "./src/subroutines/DivideWeight.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts

@@ -1,3 +1,4 @@
+; Initialises weights using Xavier initialisation
 InitialiseWeights:
 	; Load pointer with weight location
 	lda #<weight_start_index
@@ -32,28 +33,47 @@ InitialiseWeights:
 			bne @neuron_loop
 		dec layer_counter
 		bne @layer_loop
-
-	lda #$09
-	sta $0030
+	
 	rts
+
 
 GenerateWeight:
 	lda neuron_inputs
 	sta neuron_input_counter
 	@input_loop:
-		lda neuron_counter
+		lda #$00
+		sta divideweight_weight
+		lda #$01
+		sta divideweight_weight+1
+		lda neuron_inputs
 		clc
-		adc #$01
+		sbc #$01						; remove bias in count
+		sta divideweight_prev_neurons
+		
+		jsr DivideWeight
+
+		lda divideweight_weight
 		sta (weight_pointer_l), y
 
 		; Increment weight pointer
 		iny
-		sty $0040
 		cpy #$00
 		bne ++
 		inc weight_pointer_h
 		++
+
+		lda divideweight_weight+1
+		sta (weight_pointer_l), y
+
+		; Increment weight pointer
+		iny
+		cpy #$00
+		bne ++
+		inc weight_pointer_h
+		++
+
 		dec neuron_input_counter
 		bne @input_loop
 		
 	rts
+
