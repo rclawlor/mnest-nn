@@ -15,7 +15,7 @@ InitialiseWeights:
 	tay
 
 	lda LAYERS
-	clc
+	sec
 	sbc #$01
 	sta layer_counter
 	@layer_loop:
@@ -39,14 +39,20 @@ InitialiseWeights:
 
 GenerateWeight:
 	lda neuron_inputs
+	sec
+	sbc #$01
+	sta $0070
 	sta neuron_input_counter
+	;clc
+	;sbc #$01
+	;sta divideweight_prev_neurons
 	@input_loop:
 		lda #$00
 		sta divideweight_weight
 		lda #$01
 		sta divideweight_weight+1
 		lda neuron_inputs
-		clc
+		sec
 		sbc #$01						; remove bias in count
 		sta divideweight_prev_neurons
 		
@@ -58,9 +64,9 @@ GenerateWeight:
 		; Increment weight pointer
 		iny
 		cpy #$00
-		bne ++
+		bne +
 		inc weight_pointer_h
-		++
+		+
 
 		lda divideweight_weight+1
 		sta (weight_pointer_l), y
@@ -73,7 +79,30 @@ GenerateWeight:
 		++
 
 		dec neuron_input_counter
+		lda neuron_input_counter
+		;sta $0070
+		cmp #$00
 		bne @input_loop
+	
+	lda #$00
+	sta (weight_pointer_l), y
+
+	; Increment weight pointer
+	iny
+	cpy #$00
+	bne +++
+	inc weight_pointer_h
+	+++
+
+	lda #$00
+	sta (weight_pointer_l), y
+
+	; Increment weight pointer
+	iny
+	cpy #$00
+	bne ++++
+	inc weight_pointer_h
+	++++
 		
 	rts
 

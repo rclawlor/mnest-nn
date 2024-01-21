@@ -5,6 +5,7 @@ INPUTS EQU $02
 OUTPUTS EQU $01
 
 weight_start_index EQU $0400
+input_start_index EQU $0600
 
 LAYERS EQU #$04
 
@@ -31,19 +32,31 @@ LAYERS EQU #$04
 pointer_l = $0000
 pointer_h = $0001
 
-weight_pointer_l = $0005
-weight_pointer_h = $0006
+weight_pointer_l = $0002
+weight_pointer_h = $0003
+
+input_pointer_l = $0004
+input_pointer_h = $0005
+
+output_pointer_l = $0006
+output_pointer_h = $0007
+
+temp_pointer_l = $0008
+temp_pointer_h = $0009
 
 .enum $0010
-    SubroutineArgs	.dsb 16
+    SubroutineArgs	.dsb 16		; Shared space for subroutines
+	NetworkInput	.dsb 4		; Curret network inputs
 	layer_counter	.dsb 1 
 	neuron_counter	.dsb 1
 	weight_counter	.dsb 1
 	neuron_input_counter	.dsb 1
 	neuron_inputs 	.dsb 1
-.ende
 
-; weight_start_index = $0400
+	forwardpass_weight_index	.dsb 1
+	forwardpass_input_index		.dsb 1
+	neuron_output	.dsb 2
+.ende
 
 ;----------------------------------------------------------------
 ; iNES header
@@ -151,6 +164,9 @@ BackgroundLoop:
     CPX #$00
     BNE BackgroundLoop
 
+Initialisation:
+	JSR InitialiseWeights
+
 Exit:
     LDA #%10001000      ; Turn on NMI
     STA $2000
@@ -167,7 +183,13 @@ Exit:
 ; Main Loop
 ;----------------------------------------------------------------
 Loop:
-	JSR InitialiseWeights 
+	lda #$01
+	sta NetworkInput+1
+	sta NetworkInput+3
+	lda #$00
+	sta NetworkInput
+	sta NetworkInput+2
+	jsr ForwardPass
     JMP Loop
 
 ;----------------------------------------------------------------
@@ -177,6 +199,7 @@ Loop:
 .include "./src/subroutines/MultiplyFixed.asm"
 .include "./src/subroutines/InitialiseWeights.asm"
 .include "./src/subroutines/DivideWeight.asm"
+.include "./src/subroutines/ForwardPass.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts

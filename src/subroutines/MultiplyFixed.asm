@@ -19,6 +19,11 @@
 	multiplyfixed_C .dsb 2			; Third fixed number
 .ende
 MultiplyFixed:
+	; Push X and Y to stack
+	TXA
+	PHA
+	TYA
+	PHA
 ; (acc, acc+1, ext, ext+1) = (aux, aux+1) * (acc, acc+1)
     LDA #0                          ; A holds the low byte of ext (zero for now)
     STA multiplyfixed_C+1           ; high byte of ext = 0
@@ -43,4 +48,11 @@ MultiplyFixed:
     BNE @Loop                       ; loop back if not done yet
 
     STA multiplyfixed_C             ;
+
+	; Restore X and Y
+	PLA
+	TAY
+	PLA
+	TAX
+
     RTS                             ;
