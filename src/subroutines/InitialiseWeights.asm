@@ -41,11 +41,7 @@ GenerateWeight:
 	lda neuron_inputs
 	sec
 	sbc #$01
-	sta $0070
 	sta neuron_input_counter
-	;clc
-	;sbc #$01
-	;sta divideweight_prev_neurons
 	@input_loop:
 		lda #$00
 		sta divideweight_weight

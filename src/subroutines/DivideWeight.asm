@@ -10,5 +10,7 @@ DivideWeight:
 		ror divideweight_weight
 
 		dec divideweight_prev_neurons
+		lda divideweight_prev_neurons
+		cmp #$01
 		bne @shift_loop
 	rts

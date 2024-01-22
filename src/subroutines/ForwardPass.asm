@@ -44,6 +44,8 @@ ForwardPass:
 		iny
 		jsr IncrementOutputPointer
 		dec neuron_input_counter
+		lda neuron_input_counter
+		cmp #$00
 		bne @initialise_inputs
 	
 	ldx #$00
@@ -67,15 +69,18 @@ ForwardPass:
 			jsr CalculateOutput
 			ldy #$00
 			lda neuron_output
-			sta (output_pointer_l), y
-			iny
+			sta (output_pointer_l), y	
+ 			jsr IncrementOutputPointer
 			lda neuron_output+1
 			sta (output_pointer_l), y
- 			jsr IncrementOutputPointer
 			jsr IncrementOutputPointer
 			dec neuron_counter
+			lda neuron_counter
+			cmp #$00
 			bne @neuron_loop
 		dec layer_counter
+		lda layer_counter
+		cmp #$00
 		beq +
 			lda neuron_inputs
 			sec
@@ -83,10 +88,11 @@ ForwardPass:
 			sta neuron_input_counter
 			@change_input:
 				jsr IncrementTempPointer
+				jsr IncrementTempPointer
 				dec neuron_input_counter
+				lda neuron_input_counter
+				cmp #$00
 				bne @change_input
-			lda #$05
-			sta $0060
 			jmp @layer_loop
 		+
 	
@@ -110,7 +116,7 @@ CalculateOutput:
 	sta input_pointer_h
 	@input_loop:
 		; Load weights
-		ldy forwardpass_weight_index
+		ldy #$00 ;forwardpass_weight_index
 		lda (weight_pointer_l), y
 		sta multiplyfixed_A
 
@@ -120,10 +126,9 @@ CalculateOutput:
 		sta multiplyfixed_A+1
 
 		jsr IncrementWeightPointer
-		sty forwardpass_weight_index
 		
 		; Load input
-		ldy #$00 ;forwardpass_input_index
+		ldy #$00
 		lda (input_pointer_l), y
 		sta multiplyfixed_B
 
@@ -133,22 +138,24 @@ CalculateOutput:
 		sta multiplyfixed_B+1
 
 		jsr IncrementInputPointer
-		sty forwardpass_input_index
 
 		; Multiply input by weight
 		jsr MultiplyFixed
 		
 		; Add to current output
+		lda multiplyfixed_B+1
+		sta temp
 		lda multiplyfixed_C
+		sta temp+1
+		lda temp
 		sta addfixed_A
-		lda multiplyfixed_C+1
+		lda temp+1
 		sta addfixed_A+1
 
 		lda neuron_output
 		sta addfixed_B
 		lda neuron_output+1
 		sta addfixed_B+1
-		
 		jsr AddFixed
 		lda addfixed_A
 		sta neuron_output
@@ -164,7 +171,7 @@ CalculateOutput:
 	lda neuron_output+1
 	sta addfixed_A+1
 
-	ldy forwardpass_weight_index
+	ldy #$00
 	lda (weight_pointer_l), y
 	sta addfixed_B
 
@@ -174,7 +181,6 @@ CalculateOutput:
 	sta addfixed_B+1
 
 	jsr IncrementWeightPointer
-	sty forwardpass_weight_index
 	
 	jsr AddFixed
 	lda addfixed_A
@@ -185,8 +191,9 @@ CalculateOutput:
 	rts
 
 IncrementWeightPointer:
-	iny
-	cpy #$00
+	inc weight_pointer_l
+	lda weight_pointer_l
+	cmp #$00
 	bne ++
 		inc weight_pointer_h
 	++
@@ -197,13 +204,8 @@ IncrementInputPointer:
 	lda input_pointer_l
 	cmp #$00
 	bne ++
-	inc input_pointer_h
+		inc input_pointer_h
 	++
-	;iny
-	;cpy #$00
-	;bne ++
-	;	inc input_pointer_h
-	;++
 	rts
 
 IncrementOutputPointer:

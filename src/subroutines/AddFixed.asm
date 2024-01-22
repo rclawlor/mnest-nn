@@ -5,11 +5,11 @@
 .ende
 AddFixed:
     CLC
-    LDA addfixed_A+1
-    ADC addfixed_B+1
-    STA addfixed_A+1
     LDA addfixed_A
     ADC addfixed_B
     STA addfixed_A
+    LDA addfixed_A+1
+    ADC addfixed_B+1
+    STA addfixed_A+1
 
     RTS

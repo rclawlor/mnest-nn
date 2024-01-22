@@ -56,6 +56,7 @@ temp_pointer_h = $0009
 	forwardpass_weight_index	.dsb 1
 	forwardpass_input_index		.dsb 1
 	neuron_output	.dsb 2
+	temp 			.dsb 2
 .ende
 
 ;----------------------------------------------------------------
