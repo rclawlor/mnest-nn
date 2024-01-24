@@ -184,13 +184,23 @@ Exit:
 ; Main Loop
 ;----------------------------------------------------------------
 Loop:
-	lda #$01
-	sta NetworkInput+1
-	sta NetworkInput+3
+	lda #$22
+	sta dividefixed_A
 	lda #$00
-	sta NetworkInput
-	sta NetworkInput+2
-	jsr ForwardPass
+	sta dividefixed_A+1
+
+	lda #$00
+	sta dividefixed_B
+	lda #$05
+	sta dividefixed_B+1
+
+	jsr DivideFixed
+
+	lda dividefixed_result
+	sta $0080
+	lda dividefixed_result+1
+	sta $0081
+
     JMP Loop
 
 ;----------------------------------------------------------------
@@ -201,6 +211,8 @@ Loop:
 .include "./src/subroutines/InitialiseWeights.asm"
 .include "./src/subroutines/DivideWeight.asm"
 .include "./src/subroutines/ForwardPass.asm"
+.include "./src/subroutines/DivideFixed.asm"
+.include "./src/subroutines/Sigmoid.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts

@@ -187,7 +187,12 @@ CalculateOutput:
 	sta neuron_output
 	lda addfixed_A+1
 	sta neuron_output+1
-		
+
+	lda neuron_output
+	sta sigmoid_input
+	lda neuron_output+1
+	sta sigmoid_input+1
+
 	rts
 
 IncrementWeightPointer:
