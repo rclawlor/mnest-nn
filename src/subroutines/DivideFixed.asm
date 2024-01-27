@@ -13,7 +13,8 @@
 ;
 ; ------------------------ Vars -------------------------
 .enum SubroutineArgs
-	dividefixed_result	.dsb 2
+	dividefixed_A_ext	.dsb 1
+	dividefixed_result	.dsb 1
 	dividefixed_A		.dsb 2
 	dividefixed_B 		.dsb 4
 	dividefixed_rem		.dsb 4

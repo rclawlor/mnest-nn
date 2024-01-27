@@ -3,6 +3,7 @@
 ;----------------------------------------------------------------
 INPUTS EQU $02
 OUTPUTS EQU $01
+EXP_TAYLOR_N EQU #5
 
 weight_start_index EQU $0400
 input_start_index EQU $0600
@@ -46,6 +47,7 @@ temp_pointer_h = $0009
 
 .enum $0010
     SubroutineArgs	.dsb 16		; Shared space for subroutines
+	SubroutineArgsB	.dsb 16
 	NetworkInput	.dsb 4		; Curret network inputs
 	layer_counter	.dsb 1 
 	neuron_counter	.dsb 1
@@ -184,22 +186,38 @@ Exit:
 ; Main Loop
 ;----------------------------------------------------------------
 Loop:
-	lda #$22
-	sta dividefixed_A
 	lda #$00
-	sta dividefixed_A+1
+	sta exptaylor_x
+	lda #$02
+	sta exptaylor_x+1
 
-	lda #$00
-	sta dividefixed_B
-	lda #$05
-	sta dividefixed_B+1
+	jsr ExpTaylor
 
-	jsr DivideFixed
-
-	lda dividefixed_result
+	lda exptaylor_result
 	sta $0080
-	lda dividefixed_result+1
+	lda exptaylor_result+1
 	sta $0081
+
+	;lda #$00
+	;sta dividefixed_A
+	;lda #$05
+	;sta dividefixed_A+1
+
+	;lda #$00
+	;sta dividefixed_B
+	;lda #$02
+	;sta dividefixed_B+1
+
+	;jsr DivideFixed
+
+	;lda dividefixed_result
+	;sta $0080
+	;lda dividefixed_result+1
+	;sta $0081
+	;lda dividefixed_A
+	;sta $0082
+	;lda dividefixed_A+1
+	;sta $0083
 
     JMP Loop
 
@@ -213,6 +231,7 @@ Loop:
 .include "./src/subroutines/ForwardPass.asm"
 .include "./src/subroutines/DivideFixed.asm"
 .include "./src/subroutines/Sigmoid.asm"
+.include "./src/subroutines/ExpTaylor.asm"
 
 ;----------------------------------------------------------------
 ; Interrupts
